@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   ScholarPilot AI — Design System (Tailwind v4)
+   Premium dark aesthetic · gradient glows · glassmorphism
+--------------------------------------------------------------------------- */
+
+:root {
+  --background: #070a14;
+  --surface: #0d1122;
+  --foreground: #e8ebf5;
+  --muted: #9aa3b8;
+
+  --brand: #6366f1; /* indigo  */
+  --brand-2: #8b5cf6; /* violet  */
+  --accent: #22d3ee; /* cyan    */
+  --success: #34d399; /* emerald */
+
+  --border: rgba(255, 255, 255, 0.08);
+  --card: rgba(255, 255, 255, 0.03);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* --- Reusable helpers --------------------------------------------------- */
+
+.gradient-text {
+  background: linear-gradient(120deg, #a5b4fc 0%, #c4b5fd 40%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: var(--card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+}
+
+.btn-gradient {
+  background: linear-gradient(120deg, var(--brand) 0%, var(--brand-2) 100%);
+  box-shadow: 0 8px 30px -8px rgba(99, 102, 241, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 14px 40px -8px rgba(139, 92, 246, 0.7);
+}
+
+.card-hover {
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Radial glow blobs */
+.glow {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Subtle grid backdrop */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 55%, transparent 100%);
+}
+
+/* --- Animations --------------------------------------------------------- */
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float { animation: floatY 6s ease-in-out infinite; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up { animation: fadeUp 0.7s ease-out both; }
+
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-glow { animation: pulseGlow 5s ease-in-out infinite; }
