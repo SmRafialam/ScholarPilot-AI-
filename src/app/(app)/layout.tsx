@@ -10,6 +10,7 @@ const NAV = [
   { href: "/profile", label: "Profile" },
   { href: "/matches", label: "Matches" },
   { href: "/assistant", label: "AI Assistant" },
+  { href: "/documents", label: "Documents" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

@@ -45,6 +45,15 @@ body {
   overflow-x: hidden;
 }
 
+/* Native <select> dropdown options — force the dark theme so they stay
+   readable (browsers render the open dropdown on a white background by default,
+   which made our light option text unreadable). */
+select option,
+select optgroup {
+  background-color: #0d1122;
+  color: var(--foreground);
+}
+
 /* --- Reusable helpers --------------------------------------------------- */
 
 .gradient-text {
