@@ -44,10 +44,12 @@ export async function api<T = unknown>(
   options: RequestInit & { retry?: boolean } = {},
 ): Promise<T> {
   const { retry = true, ...init } = options;
+  const isForm = typeof FormData !== "undefined" && init.body instanceof FormData;
   const res = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      // Let the browser set multipart boundaries for FormData uploads.
+      ...(isForm ? {} : { "Content-Type": "application/json" }),
       ...(tokens.access ? { Authorization: `Bearer ${tokens.access}` } : {}),
       ...(init.headers ?? {}),
     },
