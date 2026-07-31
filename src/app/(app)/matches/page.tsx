@@ -16,6 +16,7 @@ interface MatchResponse {
   universities: Match[];
   scholarships: Match[];
   professors: Match[];
+  professorMatchingLocked?: boolean;
 }
 
 export default function MatchesPage() {
@@ -69,7 +70,23 @@ export default function MatchesPage() {
 
           <Section title="🎓 Universities" items={data.universities} basePath="/universities" />
           <Section title="💰 Scholarships" items={data.scholarships} basePath="/scholarships" />
-          <Section title="🔬 Professors" items={data.professors} basePath="/professors" />
+          {data.professorMatchingLocked ? (
+            <div>
+              <h2 className="mb-3 text-lg font-semibold">🔬 Professors</h2>
+              <div className="glass rounded-2xl p-6 text-center">
+                <p className="font-medium">AI professor matching is a Premium feature</p>
+                <p className="mt-1 text-sm text-muted">
+                  Upgrade to get AI-ranked professors whose research fits your profile. You can still browse all professors freely in{" "}
+                  <Link href="/explore" className="text-brand hover:underline">Explore</Link>.
+                </p>
+                <Link href="/billing" className="btn-gradient mt-4 inline-block rounded-xl px-5 py-2.5 text-sm font-medium text-white">
+                  Upgrade to Premium ✨
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <Section title="🔬 Professors" items={data.professors} basePath="/professors" />
+          )}
         </>
       )}
     </div>
