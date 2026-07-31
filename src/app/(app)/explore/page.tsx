@@ -176,6 +176,11 @@ export default function ExplorePage() {
           <button
             key={t.key}
             onClick={() => {
+              if (t.key === tab) return;
+              // Clear immediately so the next render never maps stale items of the
+              // previous type (e.g. rendering university rows as professors → crash).
+              setItems([]);
+              setTotal(0);
               setTab(t.key);
               setCountry("");
               setCity("");
@@ -329,7 +334,7 @@ export default function ExplorePage() {
               </div>
               {p.university?.name && <p className="mt-2 text-sm text-muted">{p.university.name}</p>}
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {p.researchAreas.slice(0, 3).map((a) => (
+                {(p.researchAreas ?? []).slice(0, 3).map((a) => (
                   <span key={a.name} className="rounded-full bg-black/[0.05] px-2 py-0.5 text-xs text-muted">
                     {a.name}
                   </span>
