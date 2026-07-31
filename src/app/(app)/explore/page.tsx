@@ -89,6 +89,8 @@ export default function ExplorePage() {
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [cities, setCities] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState(24);
 
   // Accumulated results across "Load more" pages.
@@ -116,6 +118,8 @@ export default function ExplorePage() {
       if (debouncedQ) params.set("q", debouncedQ);
       // Country filter applies to universities & scholarships (by code).
       if (country && tab !== "professors") params.set("country", country);
+      // City filter applies to universities only.
+      if (city && tab === "universities") params.set("city", city);
       try {
         const res = await api<Paged<unknown>>(`/${tab}?${params.toString()}`);
         if (mine !== reqId.current) return; // stale response — ignore
@@ -129,8 +133,23 @@ export default function ExplorePage() {
         if (mine === reqId.current) setLoading(false);
       }
     },
-    [tab, debouncedQ, country, pageSize],
+    [tab, debouncedQ, country, city, pageSize],
   );
+
+  // Load the city list whenever a country is chosen on the universities tab.
+  useEffect(() => {
+    if (tab !== "universities" || !country) {
+      setCities([]);
+      return;
+    }
+    let active = true;
+    api<string[]>(`/cities?country=${country}`)
+      .then((c) => active && setCities(c))
+      .catch(() => active && setCities([]));
+    return () => {
+      active = false;
+    };
+  }, [tab, country]);
 
   // Any filter change → reset to page 1.
   useEffect(() => {
@@ -159,6 +178,7 @@ export default function ExplorePage() {
             onClick={() => {
               setTab(t.key);
               setCountry("");
+              setCity("");
             }}
             className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
               tab === t.key
@@ -190,13 +210,31 @@ export default function ExplorePage() {
         {tab !== "professors" && (
           <select
             value={country}
-            onChange={(e) => setCountry(e.target.value)}
+            onChange={(e) => {
+              setCountry(e.target.value);
+              setCity("");
+            }}
             className="rounded-xl border border-black/10 bg-black/[0.04] px-3 py-2.5 text-sm outline-none focus:border-brand-2/60"
           >
             <option value="">All countries</option>
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
                 {c.name}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {tab === "universities" && country && cities.length > 0 && (
+          <select
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            className="rounded-xl border border-black/10 bg-black/[0.04] px-3 py-2.5 text-sm outline-none focus:border-brand-2/60"
+          >
+            <option value="">All cities</option>
+            {cities.map((c) => (
+              <option key={c} value={c}>
+                {c}
               </option>
             ))}
           </select>
