@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -66,23 +67,26 @@ export default function MatchesPage() {
             <span className="gradient-text font-bold">{data.profileStrength}%</span>
           </div>
 
-          <Section title="🎓 Universities" items={data.universities} />
-          <Section title="💰 Scholarships" items={data.scholarships} />
-          <Section title="🔬 Professors" items={data.professors} />
+          <Section title="🎓 Universities" items={data.universities} basePath="/universities" />
+          <Section title="💰 Scholarships" items={data.scholarships} basePath="/scholarships" />
+          <Section title="🔬 Professors" items={data.professors} basePath="/professors" />
         </>
       )}
     </div>
   );
 }
 
-function Section({ title, items }: { title: string; items: Match[] }) {
+function Section({ title, items, basePath }: { title: string; items: Match[]; basePath: string }) {
   if (!items?.length) return null;
   return (
     <div>
-      <h2 className="mb-3 text-lg font-semibold">{title}</h2>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <span className="text-xs text-muted">{items.length} matched</span>
+      </div>
       <div className="grid gap-4 md:grid-cols-2">
-        {items.slice(0, 6).map((m) => (
-          <div key={m.id} className="card-hover glass rounded-2xl p-5">
+        {items.map((m) => (
+          <Link key={m.id} href={`${basePath}/${m.id}`} className="card-hover glass block rounded-2xl p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="font-semibold">{m.name}</h3>
@@ -93,7 +97,8 @@ function Section({ title, items }: { title: string; items: Match[] }) {
               </span>
             </div>
             {m.reasoning && <p className="mt-3 text-sm leading-6 text-muted">{m.reasoning}</p>}
-          </div>
+            <span className="mt-3 inline-block text-xs font-medium text-brand">View details →</span>
+          </Link>
         ))}
       </div>
     </div>
