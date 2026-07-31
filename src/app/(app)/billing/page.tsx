@@ -88,7 +88,7 @@ export default function BillingPage() {
                 ))}
               </ul>
               {isCurrent ? (
-                <div className="mt-8 rounded-xl border border-white/10 bg-white/5 py-3 text-center text-sm text-muted">
+                <div className="mt-8 rounded-xl border border-black/10 bg-black/[0.04] py-3 text-center text-sm text-muted">
                   Current plan
                 </div>
               ) : p.tier === "FREE" ? (
@@ -98,7 +98,7 @@ export default function BillingPage() {
                   onClick={() => upgrade(p.tier)}
                   disabled={busy === p.tier}
                   className={`mt-8 block w-full rounded-xl py-3 text-center text-sm font-medium disabled:opacity-60 ${
-                    highlight ? "btn-gradient text-white" : "border border-white/10 bg-white/5 text-foreground hover:bg-white/10"
+                    highlight ? "btn-gradient text-white" : "border border-black/10 bg-black/[0.04] text-foreground hover:bg-black/[0.06]"
                   }`}
                 >
                   {busy === p.tier ? "…" : `Upgrade to ${p.name}`}

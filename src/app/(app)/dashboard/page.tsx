@@ -43,7 +43,7 @@ export default function DashboardPage() {
           <span className="text-sm text-muted">Profile completion</span>
           <span className="gradient-text text-lg font-bold">{s?.profile.completionPercent ?? 0}%</span>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-white/5">
+        <div className="h-2.5 overflow-hidden rounded-full bg-black/[0.04]">
           <div className="h-full rounded-full bg-gradient-to-r from-brand to-accent transition-all" style={{ width: `${s?.profile.completionPercent ?? 0}%` }} />
         </div>
         <p className="mt-3 text-sm text-muted">

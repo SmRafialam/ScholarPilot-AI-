@@ -60,7 +60,7 @@ export default function MatchesPage() {
         <>
           <div className="glass flex items-center gap-4 rounded-2xl p-5">
             <span className="text-sm text-muted">Profile strength</span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/[0.04]">
               <div className="h-full rounded-full bg-gradient-to-r from-brand to-accent" style={{ width: `${data.profileStrength}%` }} />
             </div>
             <span className="gradient-text font-bold">{data.profileStrength}%</span>

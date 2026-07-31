@@ -78,7 +78,7 @@ export default function TrackerPage() {
           <p className="mt-1 text-sm text-muted">{board.total} application(s) across your pipeline.</p>
         </div>
         <div className="flex items-center gap-2">
-          <select value={uniId} onChange={(e) => setUniId(e.target.value)} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
+          <select value={uniId} onChange={(e) => setUniId(e.target.value)} className="rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
             <option value="">Add a university…</option>
             {universities.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
@@ -95,9 +95,9 @@ export default function TrackerPage() {
             <div key={stage} className="w-64 shrink-0">
               <div className="mb-2 flex items-center justify-between px-1">
                 <span className="text-sm font-semibold">{STAGE_LABEL[stage] ?? stage}</span>
-                <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs text-muted">{items.length}</span>
+                <span className="rounded-full bg-black/[0.04] px-2 py-0.5 text-xs text-muted">{items.length}</span>
               </div>
-              <div className="space-y-2 rounded-2xl border border-white/5 bg-white/[0.02] p-2">
+              <div className="space-y-2 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-2">
                 {items.length === 0 && <div className="px-2 py-6 text-center text-xs text-muted">—</div>}
                 {items.map((it) => (
                   <div key={it.id} className="glass rounded-xl p-3">
@@ -109,7 +109,7 @@ export default function TrackerPage() {
                     <select
                       value={it.stage}
                       onChange={(e) => move(it.id, e.target.value)}
-                      className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs outline-none focus:border-brand-2/60"
+                      className="mt-2 w-full rounded-lg border border-black/10 bg-black/[0.04] px-2 py-1.5 text-xs outline-none focus:border-brand-2/60"
                     >
                       {board.stages.map((s) => <option key={s} value={s}>{STAGE_LABEL[s] ?? s}</option>)}
                     </select>

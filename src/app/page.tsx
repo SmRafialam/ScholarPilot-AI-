@@ -141,7 +141,7 @@ export default function Home() {
         <div className="glow animate-pulse-glow right-10 top-40 h-[300px] w-[300px] bg-accent/30" />
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
-          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-muted">
+          <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-1.5 text-xs text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
             AI copilot for studying abroad
           </div>
@@ -162,7 +162,7 @@ export default function Home() {
             <Link href="/signup" className="btn-gradient w-full rounded-xl px-7 py-3.5 text-sm font-medium text-white sm:w-auto">
               Start free — no card needed
             </Link>
-            <a href="#how" className="w-full rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-foreground transition-colors hover:bg-white/10 sm:w-auto">
+            <a href="#how" className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-7 py-3.5 text-sm font-medium text-foreground transition-colors hover:bg-black/[0.06] sm:w-auto">
               See how it works
             </a>
           </div>
@@ -194,7 +194,7 @@ export default function Home() {
       </section>
 
       {/* ===================== COUNTRY BAR ===================== */}
-      <section className="relative border-y border-white/5 bg-white/[0.02] px-6 py-10">
+      <section className="relative border-y border-black/[0.06] bg-black/[0.02] px-6 py-10">
         <p className="mb-6 text-center text-xs uppercase tracking-[0.2em] text-muted">
           Match across 12 study destinations
         </p>
@@ -202,7 +202,7 @@ export default function Home() {
           {COUNTRIES.map((c) => (
             <span
               key={c}
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-muted"
+              className="flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-4 py-1.5 text-sm text-muted"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-brand to-accent" />
               {c}
@@ -320,7 +320,7 @@ export default function Home() {
                   className={`mt-8 block rounded-xl py-3 text-center text-sm font-medium transition-colors ${
                     p.highlight
                       ? "btn-gradient text-white"
-                      : "border border-white/10 bg-white/5 text-foreground hover:bg-white/10"
+                      : "border border-black/10 bg-black/[0.04] text-foreground hover:bg-black/[0.06]"
                   }`}
                 >
                   {p.cta}
@@ -333,7 +333,7 @@ export default function Home() {
 
       {/* ===================== CTA ===================== */}
       <section className="relative px-6 py-24">
-        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/20 via-brand-2/10 to-accent/20 px-8 py-16 text-center">
+        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-black/10 bg-gradient-to-br from-brand/20 via-brand-2/10 to-accent/20 px-8 py-16 text-center">
           <div className="glow animate-pulse-glow left-1/2 top-0 h-[300px] w-[500px] -translate-x-1/2 bg-brand-2/30" />
           <div className="relative z-10">
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -350,7 +350,7 @@ export default function Home() {
       </section>
 
       {/* ===================== FOOTER ===================== */}
-      <footer className="border-t border-white/5 px-6 py-12">
+      <footer className="border-t border-black/[0.06] px-6 py-12">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="flex items-center gap-2.5">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-brand to-brand-2 text-sm font-bold text-white">
@@ -392,7 +392,7 @@ function PreviewStat({
     success: "text-success",
   };
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-left">
+    <div className="rounded-xl border border-black/10 bg-black/[0.03] p-4 text-left">
       <div className="text-xs text-muted">{label}</div>
       <div className={`mt-1 text-3xl font-bold ${toneMap[tone]}`}>{value}</div>
       <div className="mt-1 text-xs text-muted">{sub}</div>

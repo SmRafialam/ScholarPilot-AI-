@@ -52,7 +52,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const linkClass = (href: string, extra = "") =>
     `whitespace-nowrap rounded-lg px-3 py-1.5 transition-colors ${
-      pathname === href ? "bg-white/10 text-foreground" : "text-muted hover:text-foreground"
+      pathname === href ? "bg-black/[0.06] text-foreground" : "text-muted hover:text-foreground"
     } ${extra}`;
 
   return (
@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 href="/notifications"
                 aria-label="Notifications"
-                className="relative grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-muted transition-colors hover:text-foreground"
+                className="relative grid h-9 w-9 place-items-center rounded-lg border border-black/10 text-muted transition-colors hover:text-foreground"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
                   <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" />
@@ -102,7 +102,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {/* Desktop logout */}
               <button
                 onClick={logout}
-                className="hidden rounded-lg border border-white/10 px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground lg:block"
+                className="hidden rounded-lg border border-black/10 px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground lg:block"
               >
                 Log out
               </button>
@@ -110,7 +110,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <button
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-label="Menu"
-                className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 text-muted lg:hidden"
+                className="grid h-9 w-9 place-items-center rounded-lg border border-black/10 text-muted lg:hidden"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="h-[18px] w-[18px]">
                   {menuOpen ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 12h18M3 6h18M3 18h18" />}
@@ -121,7 +121,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           {/* Mobile dropdown menu */}
           {menuOpen && (
-            <div className="mt-3 flex flex-col gap-1 border-t border-white/10 pt-3 text-sm lg:hidden">
+            <div className="mt-3 flex flex-col gap-1 border-t border-black/10 pt-3 text-sm lg:hidden">
               {NAV.map((item) => (
                 <Link key={item.href} href={item.href} className={linkClass(item.href)}>
                   {item.label}
@@ -132,7 +132,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
               <button
                 onClick={logout}
-                className="mt-1 rounded-lg border border-white/10 px-3 py-2 text-left text-muted hover:text-foreground"
+                className="mt-1 rounded-lg border border-black/10 px-3 py-2 text-left text-muted hover:text-foreground"
               >
                 Log out
               </button>

@@ -16,7 +16,7 @@ const TYPE_STYLE: Record<string, string> = {
   MATCH: "bg-brand/15 text-brand",
   STATUS: "bg-accent/15 text-accent",
   DEADLINE: "bg-amber-500/15 text-amber-400",
-  SYSTEM: "bg-white/10 text-muted",
+  SYSTEM: "bg-black/[0.06] text-muted",
 };
 
 export default function NotificationsPage() {
@@ -50,7 +50,7 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Notifications</h1>
         {items.some((n) => !n.read) && (
-          <button onClick={markAll} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-muted hover:text-foreground">
+          <button onClick={markAll} className="rounded-lg border border-black/10 bg-black/[0.04] px-3 py-1.5 text-sm text-muted hover:text-foreground">
             Mark all read
           </button>
         )}
@@ -67,7 +67,7 @@ export default function NotificationsPage() {
               {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gradient-to-r from-brand to-brand-2" />}
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TYPE_STYLE[n.type] ?? "bg-white/10 text-muted"}`}>{n.type}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TYPE_STYLE[n.type] ?? "bg-black/[0.06] text-muted"}`}>{n.type}</span>
                   <span className="font-medium">{n.title}</span>
                 </div>
                 {n.body && <p className="mt-1 text-sm text-muted">{n.body}</p>}

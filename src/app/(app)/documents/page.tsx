@@ -118,7 +118,7 @@ export default function DocumentsPage() {
           <span className="mb-1.5 block text-sm text-muted">Document type</span>
           <select
             value={type} onChange={(e) => setType(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60"
+            className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60"
           >
             {DOC_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
@@ -128,7 +128,7 @@ export default function DocumentsPage() {
           <input
             value={context} onChange={(e) => setContext(e.target.value)}
             placeholder="e.g. emphasize my computer vision project"
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60"
+            className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60"
           />
         </label>
         <button onClick={generate} disabled={busy === "gen"} className="btn-gradient rounded-xl px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60">
@@ -148,7 +148,7 @@ export default function DocumentsPage() {
               <button
                 key={d.id} onClick={() => open(d.id)}
                 className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                  current?.id === d.id ? "bg-white/10 text-foreground" : "text-muted hover:bg-white/5"
+                  current?.id === d.id ? "bg-black/[0.06] text-foreground" : "text-muted hover:bg-black/[0.04]"
                 }`}
               >
                 {d.title ?? d.type} <span className="text-xs text-muted">v{d.version}</span>
@@ -169,7 +169,7 @@ export default function DocumentsPage() {
                 <h3 className="font-semibold">{current.title ?? current.type} <span className="text-xs text-muted">v{current.version}</span></h3>
                 <div className="flex items-center gap-2">
                   {msg && <span className="text-sm text-muted">{msg}</span>}
-                  <button onClick={regenerate} disabled={busy === "regen"} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground disabled:opacity-60">
+                  <button onClick={regenerate} disabled={busy === "regen"} className="rounded-lg border border-black/10 bg-black/[0.04] px-3 py-1.5 text-sm text-muted transition-colors hover:text-foreground disabled:opacity-60">
                     {busy === "regen" ? "Regenerating…" : "Regenerate"}
                   </button>
                   <button onClick={save} disabled={busy === "save"} className="btn-gradient rounded-lg px-4 py-1.5 text-sm font-medium text-white disabled:opacity-60">
@@ -180,7 +180,7 @@ export default function DocumentsPage() {
               <textarea
                 value={content} onChange={(e) => setContent(e.target.value)}
                 rows={22}
-                className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 font-mono text-sm leading-6 outline-none focus:border-brand-2/60"
+                className="w-full rounded-xl border border-black/10 bg-black/[0.03] px-4 py-3 font-mono text-sm leading-6 outline-none focus:border-brand-2/60"
               />
             </>
           )}

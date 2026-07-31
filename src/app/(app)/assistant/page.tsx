@@ -71,7 +71,7 @@ export default function AssistantPage() {
             <h2 className="mb-4 text-lg font-semibold">📈 Improvement roadmap</h2>
             <div className="space-y-3">
               {data.roadmap?.map((r, i) => (
-                <div key={i} className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
+                <div key={i} className="rounded-xl border border-black/[0.06] bg-black/[0.03] p-4">
                   <div className="flex items-center gap-2">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyle(r.priority)}`}>
                       {r.priority}
@@ -95,7 +95,7 @@ export default function AssistantPage() {
               <h2 className="mb-3 text-lg font-semibold">📝 Required exams</h2>
               <div className="flex flex-wrap gap-2">
                 {(data.timeline?.requiredExams ?? []).map((e, i) => (
-                  <span key={i} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-muted">{e}</span>
+                  <span key={i} className="rounded-full border border-black/10 bg-black/[0.04] px-3 py-1.5 text-sm text-muted">{e}</span>
                 ))}
                 {!data.timeline?.requiredExams?.length && <span className="text-sm text-muted">—</span>}
               </div>
@@ -120,7 +120,7 @@ function ChanceCard({ title, data, from, to }: { title: string; data: Record<str
               <span className="text-muted">{country}</span>
               <span className="font-medium">{pct}%</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/5">
+            <div className="h-2 overflow-hidden rounded-full bg-black/[0.04]">
               <div className={`h-full rounded-full bg-gradient-to-r ${from} ${to}`} style={{ width: `${pct}%` }} />
             </div>
           </div>

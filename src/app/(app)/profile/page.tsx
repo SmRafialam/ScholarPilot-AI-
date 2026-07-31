@@ -125,7 +125,7 @@ export default function ProfilePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Your profile</h1>
-        <span className="rounded-full bg-white/5 px-3 py-1 text-sm text-muted">{p.completionPercent}% complete</span>
+        <span className="rounded-full bg-black/[0.04] px-3 py-1 text-sm text-muted">{p.completionPercent}% complete</span>
       </div>
 
       {/* CV upload */}
@@ -152,11 +152,11 @@ export default function ProfilePage() {
           <Num label="Budget (USD / year)" value={p.budgetUsd} onChange={(v) => set("budgetUsd", v)} />
           <div>
             <span className="mb-1.5 block text-sm text-muted">IELTS score</span>
-            <input type="number" step="0.5" value={ielts} onChange={(e) => setIelts(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
+            <input type="number" step="0.5" value={ielts} onChange={(e) => setIelts(e.target.value)} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
           </div>
           <div>
             <span className="mb-1.5 block text-sm text-muted">Preferred intake</span>
-            <select value={p.preferredIntake ?? ""} onChange={(e) => set("preferredIntake", e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
+            <select value={p.preferredIntake ?? ""} onChange={(e) => set("preferredIntake", e.target.value)} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
               <option value="">—</option>
               {INTAKES.map((i) => <option key={i} value={i}>{i}</option>)}
             </select>
@@ -164,13 +164,13 @@ export default function ProfilePage() {
         </div>
         <div>
           <span className="mb-1.5 block text-sm text-muted">Research interest</span>
-          <textarea value={p.researchInterest ?? ""} onChange={(e) => set("researchInterest", e.target.value)} rows={2} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
+          <textarea value={p.researchInterest ?? ""} onChange={(e) => set("researchInterest", e.target.value)} rows={2} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
         </div>
         <div>
           <span className="mb-2 block text-sm text-muted">Target countries</span>
           <div className="flex flex-wrap gap-2">
             {COUNTRIES.map((c) => (
-              <button key={c} onClick={() => toggleCountry(c)} type="button" className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${p.targetCountries.includes(c) ? "border-brand-2/50 bg-brand/20 text-foreground" : "border-white/10 bg-white/5 text-muted hover:text-foreground"}`}>{c}</button>
+              <button key={c} onClick={() => toggleCountry(c)} type="button" className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${p.targetCountries.includes(c) ? "border-brand-2/50 bg-brand/20 text-foreground" : "border-black/10 bg-black/[0.04] text-muted hover:text-foreground"}`}>{c}</button>
             ))}
           </div>
         </div>
@@ -186,15 +186,15 @@ export default function ProfilePage() {
         <div className="mb-4 flex flex-wrap gap-2">
           {p.skills.length === 0 && <span className="text-sm text-muted">No skills yet.</span>}
           {p.skills.map((s) => (
-            <span key={s.id} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm">
+            <span key={s.id} className="flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-3 py-1.5 text-sm">
               {s.name}
               <button onClick={() => removeSkill(s.id)} className="text-muted hover:text-red-400">×</button>
             </span>
           ))}
         </div>
         <div className="flex gap-2">
-          <input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addSkill()} placeholder="e.g. Python" className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
-          <button onClick={addSkill} className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm hover:bg-white/10">Add</button>
+          <input value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addSkill()} placeholder="e.g. Python" className="flex-1 rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
+          <button onClick={addSkill} className="rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm hover:bg-black/[0.06]">Add</button>
         </div>
       </div>
 
@@ -217,7 +217,7 @@ function ListCard({ title, empty, items, onRemove }: { title: string; empty: str
       ) : (
         <ul className="space-y-2">
           {items.map((it) => (
-            <li key={it.id} className="flex items-start justify-between gap-2 rounded-lg border border-white/5 bg-white/[0.03] p-3">
+            <li key={it.id} className="flex items-start justify-between gap-2 rounded-lg border border-black/[0.06] bg-black/[0.03] p-3">
               <div>
                 <div className="text-sm font-medium">{it.main}</div>
                 {it.sub && <div className="text-xs text-muted">{it.sub}</div>}
@@ -235,7 +235,7 @@ function Text({ label, value, onChange }: { label: string; value: string; onChan
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm text-muted">{label}</span>
-      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
+      <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
     </label>
   );
 }
@@ -244,7 +244,7 @@ function Num({ label, value, onChange, step }: { label: string; value: number | 
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm text-muted">{label}</span>
-      <input type="number" step={step} value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
+      <input type="number" step={step} value={value ?? ""} onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60" />
     </label>
   );
 }

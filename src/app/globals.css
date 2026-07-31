@@ -2,22 +2,24 @@
 
 /* ---------------------------------------------------------------------------
    ScholarPilot AI — Design System (Tailwind v4)
-   Premium dark aesthetic · gradient glows · glassmorphism
+   Warm LIGHT aesthetic · peach/cream · coral→lavender→peach gradients · glass
 --------------------------------------------------------------------------- */
 
 :root {
-  --background: #070a14;
-  --surface: #0d1122;
-  --foreground: #e8ebf5;
-  --muted: #9aa3b8;
+  color-scheme: light;
 
-  --brand: #6366f1; /* indigo  */
-  --brand-2: #8b5cf6; /* violet  */
-  --accent: #22d3ee; /* cyan    */
-  --success: #34d399; /* emerald */
+  --background: #fbf3ee; /* warm cream/peach */
+  --surface: #fffaf5;
+  --foreground: #3c2e39; /* deep warm plum */
+  --muted: #93798a; /* warm mauve-gray */
 
-  --border: rgba(255, 255, 255, 0.08);
-  --card: rgba(255, 255, 255, 0.03);
+  --brand: #f2694f; /* coral */
+  --brand-2: #a06bf0; /* soft violet/lavender */
+  --accent: #ff9e6d; /* peach */
+  --success: #24a97e; /* soft green */
+
+  --border: rgba(60, 40, 56, 0.1);
+  --card: rgba(255, 255, 255, 0.6);
 }
 
 @theme inline {
@@ -38,26 +40,30 @@
 }
 
 body {
-  background: var(--background);
+  /* Soft warm gradient mesh behind the glass surfaces */
+  background:
+    radial-gradient(1100px 620px at 12% -10%, rgba(255, 158, 109, 0.35), transparent 60%),
+    radial-gradient(1000px 700px at 100% 8%, rgba(160, 107, 240, 0.22), transparent 55%),
+    radial-gradient(900px 640px at 50% 112%, rgba(242, 105, 79, 0.18), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Native <select> dropdown options — force the dark theme so they stay
-   readable (browsers render the open dropdown on a white background by default,
-   which made our light option text unreadable). */
+/* Native <select> dropdown options — keep readable on the light theme. */
 select option,
 select optgroup {
-  background-color: #0d1122;
+  background-color: #fffaf5;
   color: var(--foreground);
 }
 
 /* --- Reusable helpers --------------------------------------------------- */
 
 .gradient-text {
-  background: linear-gradient(120deg, #a5b4fc 0%, #c4b5fd 40%, #67e8f9 100%);
+  background: linear-gradient(120deg, #ef5f83 0%, #a45cf0 48%, #ff8a5c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -65,37 +71,38 @@ select optgroup {
 
 .glass {
   background: var(--card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 10px 34px -14px rgba(120, 70, 100, 0.22);
 }
 
 .btn-gradient {
   background: linear-gradient(120deg, var(--brand) 0%, var(--brand-2) 100%);
-  box-shadow: 0 8px 30px -8px rgba(99, 102, 241, 0.6);
+  box-shadow: 0 10px 28px -8px rgba(242, 105, 79, 0.5);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 .btn-gradient:hover {
   transform: translateY(-2px);
-  filter: brightness(1.08);
-  box-shadow: 0 14px 40px -8px rgba(139, 92, 246, 0.7);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 38px -8px rgba(160, 107, 240, 0.55);
 }
 
 .card-hover {
-  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .card-hover:hover {
   transform: translateY(-4px);
-  border-color: rgba(139, 92, 246, 0.4);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(160, 107, 240, 0.45);
+  box-shadow: 0 18px 44px -16px rgba(160, 107, 240, 0.3);
 }
 
-/* Radial glow blobs */
+/* Radial glow blobs (warm colored ambiance) */
 .glow {
   position: absolute;
   border-radius: 9999px;
   filter: blur(90px);
-  opacity: 0.5;
+  opacity: 0.55;
   pointer-events: none;
   z-index: 0;
 }
@@ -103,8 +110,8 @@ select optgroup {
 /* Subtle grid backdrop */
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(60, 40, 56, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(60, 40, 56, 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 55%, transparent 100%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 55%, transparent 100%);
@@ -130,7 +137,7 @@ select optgroup {
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; }
+  0%, 100% { opacity: 0.45; }
   50% { opacity: 0.7; }
 }
 .animate-pulse-glow { animation: pulseGlow 5s ease-in-out infinite; }
