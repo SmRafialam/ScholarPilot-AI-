@@ -30,19 +30,24 @@ const STAGE_LABEL: Record<string, string> = {
   ACCEPTED: "Accepted",
 };
 
-// Linear progression pipeline (terminal states handled separately).
 const PIPELINE = ["INTERESTED", "PLANNING", "DOCUMENTS_PENDING", "APPLIED", "WAITING", "INTERVIEW", "OFFER"];
 const ALL_STAGES = [...PIPELINE, "ACCEPTED", "REJECTED"];
 
-function stageTone(stage: string): string {
+function chipTone(stage: string): string {
   if (stage === "ACCEPTED" || stage === "OFFER") return "text-success bg-success/15";
   if (stage === "REJECTED") return "text-danger bg-danger/15";
   if (stage === "INTERVIEW" || stage === "WAITING") return "text-accent bg-accent/15";
   return "text-brand bg-brand/15";
 }
+function dotColor(stage: string): string {
+  if (stage === "ACCEPTED" || stage === "OFFER") return "bg-success";
+  if (stage === "REJECTED") return "bg-danger";
+  if (stage === "INTERVIEW" || stage === "WAITING") return "bg-accent";
+  return "bg-brand";
+}
 function pipelineIndex(stage: string): number {
   if (stage === "ACCEPTED") return PIPELINE.length - 1;
-  return PIPELINE.indexOf(stage); // -1 for REJECTED
+  return PIPELINE.indexOf(stage);
 }
 
 export default function TrackerPage() {
@@ -87,14 +92,14 @@ export default function TrackerPage() {
   const counts = Object.fromEntries(ALL_STAGES.map((s) => [s, (board.columns[s] ?? []).length]));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Application Tracker</h1>
           <p className="mt-1 text-sm text-muted">{board.total} application(s) across your pipeline.</p>
         </div>
         <div className="flex items-center gap-2">
-          <select value={uniId} onChange={(e) => setUniId(e.target.value)} className="rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
+          <select value={uniId} onChange={(e) => setUniId(e.target.value)} className="max-w-[220px] rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
             <option value="">Add a university…</option>
             {universities.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
           </select>
@@ -105,18 +110,16 @@ export default function TrackerPage() {
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       {/* Pipeline overview — every stage at a glance, no scrolling */}
-      <div className="glass animate-fade-up rounded-2xl p-4">
-        <div className="flex flex-wrap gap-2">
-          {ALL_STAGES.map((s) => (
-            <div key={s} className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors ${counts[s] > 0 ? "bg-black/[0.03]" : ""}`}>
-              <span className={`grid h-6 min-w-6 place-items-center rounded-full px-1.5 text-xs font-bold ${stageTone(s)}`}>{counts[s]}</span>
-              <span className={counts[s] > 0 ? "text-foreground" : "text-muted"}>{STAGE_LABEL[s]}</span>
-            </div>
-          ))}
-        </div>
+      <div className="glass animate-fade-up flex flex-wrap gap-1.5 rounded-2xl p-3">
+        {ALL_STAGES.filter((s) => counts[s] > 0 || PIPELINE.includes(s)).map((s) => (
+          <span key={s} className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs ${counts[s] > 0 ? "bg-black/[0.03] text-foreground" : "text-muted"}`}>
+            <span className={`grid h-4 min-w-4 place-items-center rounded-full px-1 text-[10px] font-bold ${chipTone(s)}`}>{counts[s]}</span>
+            {STAGE_LABEL[s]}
+          </span>
+        ))}
       </div>
 
-      {/* Applications with a progress stepper each */}
+      {/* Compact application list */}
       {apps.length === 0 ? (
         <div className="glass animate-fade-up rounded-2xl p-12 text-center">
           <div className="text-4xl">📋</div>
@@ -124,78 +127,44 @@ export default function TrackerPage() {
           <p className="mt-1 text-sm text-muted">Pick a university above and hit <span className="font-medium text-foreground">Add</span> to start tracking.</p>
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {apps.map((app, i) => (
-            <ApplicationCard key={app.id} app={app} index={i} onMove={move} onRemove={remove} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ApplicationCard({ app, index, onMove, onRemove }: { app: AppItem; index: number; onMove: (id: string, stage: string) => void; onRemove: (id: string) => void }) {
-  const activeIdx = pipelineIndex(app.stage);
-  const rejected = app.stage === "REJECTED";
-  const accepted = app.stage === "ACCEPTED";
-
-  return (
-    <div className="card-hover glass animate-fade-up rounded-2xl p-5" style={{ animationDelay: `${Math.min(index * 0.05, 0.4)}s` }}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="truncate font-semibold">{app.targetName ?? "Application"}</h3>
-          {app.targetType && <span className="text-xs text-muted">{app.targetType.toLowerCase()}</span>}
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${stageTone(app.stage)}`}>{STAGE_LABEL[app.stage]}</span>
-          <button onClick={() => onRemove(app.id)} aria-label="Remove" className="text-lg leading-none text-muted transition-colors hover:text-danger">×</button>
-        </div>
-      </div>
-
-      {/* Progress stepper — click a segment to jump to that stage */}
-      <div className="mt-4">
-        <div className="flex items-center gap-1">
-          {PIPELINE.map((st, i) => {
-            const filled = !rejected && i <= activeIdx;
+        <div className="glass animate-fade-up overflow-hidden rounded-2xl">
+          {apps.map((app) => {
+            const activeIdx = pipelineIndex(app.stage);
+            const rejected = app.stage === "REJECTED";
+            const accepted = app.stage === "ACCEPTED";
             return (
-              <button
-                key={st}
-                onClick={() => onMove(app.id, st)}
-                title={STAGE_LABEL[st]}
-                className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                  rejected
-                    ? "bg-danger/25"
-                    : filled
-                      ? accepted
-                        ? "bg-gradient-to-r from-success to-success"
-                        : "bg-gradient-to-r from-brand to-brand-2"
-                      : "bg-black/[0.08] hover:bg-black/[0.15]"
-                }`}
-              />
+              <div key={app.id} className="flex items-center gap-3 border-t border-black/[0.06] px-3 py-2.5 transition-colors first:border-t-0 hover:bg-black/[0.02] sm:px-4">
+                <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotColor(app.stage)}`} title={STAGE_LABEL[app.stage]} />
+
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{app.targetName ?? "Application"}</div>
+                </div>
+
+                {/* mini stepper (desktop only) */}
+                <div className="hidden w-24 items-center gap-0.5 md:flex lg:w-32" title={STAGE_LABEL[app.stage]}>
+                  {PIPELINE.map((st, i) => (
+                    <span key={st} className={`h-1.5 flex-1 rounded-full transition-all ${rejected ? "bg-danger/25" : i <= activeIdx ? (accepted ? "bg-success" : "bg-gradient-to-r from-brand to-brand-2") : "bg-black/[0.08]"}`} />
+                  ))}
+                </div>
+
+                {app.deadline && (
+                  <span className="hidden whitespace-nowrap text-xs text-muted sm:inline">⏰ {new Date(app.deadline).toLocaleDateString()}</span>
+                )}
+
+                <select
+                  value={app.stage}
+                  onChange={(e) => move(app.id, e.target.value)}
+                  className={`shrink-0 rounded-lg border border-black/10 bg-black/[0.04] px-2 py-1.5 text-xs font-medium outline-none focus:border-brand-2/60 ${chipTone(app.stage).split(" ")[0]}`}
+                >
+                  {ALL_STAGES.map((s) => <option key={s} value={s} className="text-foreground">{STAGE_LABEL[s]}</option>)}
+                </select>
+
+                <button onClick={() => remove(app.id)} aria-label="Remove" className="shrink-0 text-lg leading-none text-muted transition-colors hover:text-danger">×</button>
+              </div>
             );
           })}
         </div>
-        <div className="mt-1.5 flex justify-between text-[10px] uppercase tracking-wide text-muted">
-          <span>Interested</span>
-          <span>{accepted ? "Accepted 🎉" : rejected ? "Rejected" : "Offer"}</span>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="mt-4 flex items-center gap-2">
-        <select
-          value={app.stage}
-          onChange={(e) => onMove(app.id, e.target.value)}
-          className="flex-1 rounded-lg border border-black/10 bg-black/[0.04] px-3 py-2 text-xs outline-none focus:border-brand-2/60"
-        >
-          {ALL_STAGES.map((s) => <option key={s} value={s}>{STAGE_LABEL[s]}</option>)}
-        </select>
-        {app.deadline && (
-          <span className="whitespace-nowrap rounded-lg bg-black/[0.04] px-2.5 py-2 text-xs text-muted">
-            ⏰ {new Date(app.deadline).toLocaleDateString()}
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 }
