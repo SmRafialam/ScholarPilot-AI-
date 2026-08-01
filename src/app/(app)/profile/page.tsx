@@ -55,13 +55,9 @@ export default function ProfilePage() {
   }
   useEffect(() => {
     load().catch(() => {});
-    // Country list for the "home country" selector — derived from the catalog.
-    api<{ data: { country: Country | null }[] }>("/universities?limit=100")
-      .then((r) => {
-        const map = new Map<string, string>();
-        r.data.forEach((u) => u.country && map.set(u.country.id, u.country.name));
-        setCountries([...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name)));
-      })
+    // Full country list for the "home country" selector.
+    api<{ id: string; name: string; code: string }[]>("/countries")
+      .then((rows) => setCountries(rows.map((c) => ({ id: c.id, name: c.name }))))
       .catch(() => {});
   }, []);
 
