@@ -24,21 +24,29 @@ export default function Tracker() {
 
   useEffect(() => {
     if (!pathname) return;
+    let visitorId: string;
     try {
-      const visitorId = getVisitorId();
-      fetch(`${BASE}/analytics/track`, {
+      visitorId = getVisitorId();
+    } catch {
+      return; // never break the page over analytics
+    }
+
+    const post = (endpoint: string, body: object) =>
+      fetch(`${BASE}/analytics/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          path: pathname,
-          visitorId,
-          referrer: document.referrer || undefined,
-        }),
+        body: JSON.stringify(body),
         keepalive: true,
       }).catch(() => {});
-    } catch {
-      /* never break the page over analytics */
-    }
+
+    // Record the page view.
+    post("track", { path: pathname, visitorId, referrer: document.referrer || undefined });
+
+    // Heartbeat: keep this visitor counted as "online" while the tab is open.
+    const ping = () => post("ping", { path: pathname, visitorId });
+    ping();
+    const timer = setInterval(ping, 45_000);
+    return () => clearInterval(timer);
   }, [pathname]);
 
   return null;
