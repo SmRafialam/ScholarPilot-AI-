@@ -8,13 +8,18 @@ const COUNTRIES = [
   "Sweden", "Norway", "Denmark", "Ireland", "Netherlands",
 ];
 const INTAKES = ["FALL", "SPRING", "SUMMER", "WINTER"];
+const DEGREES = ["BACHELOR", "MASTER", "PHD", "DIPLOMA", "CERTIFICATE"];
 
 interface Skill { id: string; name: string; }
 interface TestScore { id: string; type: string; score: number; }
 interface Education { id: string; institution: string; degree: string; major: string | null; }
 interface Experience { id: string; title: string; organization: string; }
+interface Project { id: string; name: string; }
 interface Publication { id: string; title: string; venue: string | null; year: number | null; }
+interface Country { id: string; name: string; }
 interface Profile {
+  fullName: string | null;
+  countryId: string | null;
   currentUniversity: string | null;
   department: string | null;
   cgpa: number | null;
@@ -27,11 +32,13 @@ interface Profile {
   testScores: TestScore[];
   educations: Education[];
   experiences: Experience[];
+  projects: Project[];
   publications: Publication[];
 }
 
 export default function ProfilePage() {
   const [p, setP] = useState<Profile | null>(null);
+  const [countries, setCountries] = useState<Country[]>([]);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
   const [newSkill, setNewSkill] = useState("");
@@ -48,6 +55,14 @@ export default function ProfilePage() {
   }
   useEffect(() => {
     load().catch(() => {});
+    // Country list for the "home country" selector — derived from the catalog.
+    api<{ data: { country: Country | null }[] }>("/universities?limit=100")
+      .then((r) => {
+        const map = new Map<string, string>();
+        r.data.forEach((u) => u.country && map.set(u.country.id, u.country.name));
+        setCountries([...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => {});
   }, []);
 
   function set<K extends keyof Profile>(key: K, value: Profile[K]) {
@@ -66,6 +81,7 @@ export default function ProfilePage() {
       await api("/profile", {
         method: "PATCH",
         body: JSON.stringify({
+          countryId: p.countryId || undefined,
           currentUniversity: p.currentUniversity || undefined,
           department: p.department || undefined,
           cgpa: p.cgpa ?? undefined,
@@ -118,8 +134,15 @@ export default function ProfilePage() {
     await api(`/profile/${kind}/${id}`, { method: "DELETE" });
     await load();
   }
+  async function addItem(kind: string, body: object) {
+    await api(`/profile/${kind}`, { method: "POST", body: JSON.stringify(body) });
+    await load();
+  }
 
   if (!p) return <div className="text-muted">Loading…</div>;
+
+  const checklist = buildChecklist(p);
+  const done = checklist.filter((c) => c.done).length;
 
   return (
     <div className="space-y-6">
@@ -127,6 +150,9 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-semibold">Your profile</h1>
         <span className="rounded-full bg-black/[0.04] px-3 py-1 text-sm text-muted">{p.completionPercent}% complete</span>
       </div>
+
+      {/* Completion checklist */}
+      <ChecklistCard checklist={checklist} done={done} total={checklist.length} percent={p.completionPercent} />
 
       {/* CV upload */}
       <div className="glass rounded-2xl border border-brand-2/30 p-6">
@@ -146,6 +172,13 @@ export default function ProfilePage() {
       {/* Core */}
       <div className="glass space-y-4 rounded-2xl p-6">
         <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <span className="mb-1.5 block text-sm text-muted">Home country</span>
+            <select value={p.countryId ?? ""} onChange={(e) => set("countryId", e.target.value || null)} className="w-full rounded-xl border border-black/10 bg-black/[0.04] px-4 py-2.5 text-sm outline-none focus:border-brand-2/60">
+              <option value="">—</option>
+              {countries.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
           <Text label="Current university" value={p.currentUniversity ?? ""} onChange={(v) => set("currentUniversity", v)} />
           <Text label="Department / Major" value={p.department ?? ""} onChange={(v) => set("department", v)} />
           <Num label="CGPA (out of 4)" value={p.cgpa} onChange={(v) => set("cgpa", v)} step="0.01" />
@@ -198,20 +231,173 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Education / Experience / Publications */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <ListCard title="🎓 Education" empty="Upload a CV or add manually." items={p.educations.map((e) => ({ id: e.id, main: e.institution, sub: `${e.degree}${e.major ? " · " + e.major : ""}` }))} onRemove={(id) => removeItem("educations", id)} />
-        <ListCard title="💼 Experience" empty="No experience yet." items={p.experiences.map((e) => ({ id: e.id, main: e.title, sub: e.organization }))} onRemove={(id) => removeItem("experiences", id)} />
-        <ListCard title="📚 Publications" empty="No publications yet." items={p.publications.map((pub) => ({ id: pub.id, main: pub.title, sub: [pub.venue, pub.year].filter(Boolean).join(" · ") }))} onRemove={(id) => removeItem("publications", id)} />
+      {/* Education / Experience / Projects / Publications */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <ListCard
+          title="🎓 Education" empty="Upload a CV or add manually."
+          items={p.educations.map((e) => ({ id: e.id, main: e.institution, sub: `${e.degree}${e.major ? " · " + e.major : ""}` }))}
+          onRemove={(id) => removeItem("educations", id)}
+          fields={[{ name: "institution", label: "Institution", required: true }, { name: "degree", label: "Degree", options: DEGREES }, { name: "major", label: "Major (optional)" }]}
+          onAdd={(v) => addItem("educations", { institution: v.institution, degree: v.degree || "BACHELOR", major: v.major || undefined })}
+        />
+        <ListCard
+          title="💼 Experience" empty="No experience yet."
+          items={p.experiences.map((e) => ({ id: e.id, main: e.title, sub: e.organization }))}
+          onRemove={(id) => removeItem("experiences", id)}
+          fields={[{ name: "title", label: "Title", required: true }, { name: "organization", label: "Organization", required: true }]}
+          onAdd={(v) => addItem("experiences", { title: v.title, organization: v.organization })}
+        />
+        <ListCard
+          title="🧪 Projects" empty="No projects yet."
+          items={p.projects.map((pr) => ({ id: pr.id, main: pr.name, sub: "" }))}
+          onRemove={(id) => removeItem("projects", id)}
+          fields={[{ name: "name", label: "Project name", required: true }, { name: "description", label: "Description (optional)" }]}
+          onAdd={(v) => addItem("projects", { name: v.name, description: v.description || undefined })}
+        />
+        <ListCard
+          title="📚 Publications" empty="No publications yet."
+          items={p.publications.map((pub) => ({ id: pub.id, main: pub.title, sub: [pub.venue, pub.year].filter(Boolean).join(" · ") }))}
+          onRemove={(id) => removeItem("publications", id)}
+          fields={[{ name: "title", label: "Title", required: true }, { name: "venue", label: "Venue (optional)" }, { name: "year", label: "Year (optional)", type: "number" }]}
+          onAdd={(v) => addItem("publications", { title: v.title, venue: v.venue || undefined, year: v.year ? Number(v.year) : undefined })}
+        />
       </div>
     </div>
   );
 }
 
-function ListCard({ title, empty, items, onRemove }: { title: string; empty: string; items: { id: string; main: string; sub: string }[]; onRemove: (id: string) => void }) {
+/* ------------------------------------------------------- completion checklist */
+
+interface Check { section: string; label: string; done: boolean; hint: string; }
+
+function buildChecklist(p: Profile): Check[] {
+  return [
+    { section: "Basics", label: "Full name", done: !!p.fullName, hint: "Set when you signed up" },
+    { section: "Basics", label: "Home country", done: !!p.countryId, hint: "Pick your home country below" },
+    { section: "Academics", label: "Current university", done: !!p.currentUniversity, hint: "Fill “Current university”" },
+    { section: "Academics", label: "Department / Major", done: !!p.department, hint: "Fill “Department / Major”" },
+    { section: "Academics", label: "CGPA", done: p.cgpa != null, hint: "Fill “CGPA”" },
+    { section: "Academics", label: "Education entry", done: p.educations.length > 0, hint: "Add an education (or import CV)" },
+    { section: "Tests & Skills", label: "Test score (IELTS…)", done: p.testScores.length > 0, hint: "Add your IELTS score" },
+    { section: "Tests & Skills", label: "Skills", done: p.skills.length > 0, hint: "Add at least one skill" },
+    { section: "Experience & Research", label: "Research interest", done: !!p.researchInterest, hint: "Fill “Research interest”" },
+    { section: "Experience & Research", label: "Experience", done: p.experiences.length > 0, hint: "Add work/research experience" },
+    { section: "Experience & Research", label: "Project", done: p.projects.length > 0, hint: "Add a project" },
+    { section: "Experience & Research", label: "Publication", done: p.publications.length > 0, hint: "Add a publication" },
+    { section: "Preferences", label: "Budget (USD/year)", done: p.budgetUsd != null, hint: "Fill “Budget”" },
+    { section: "Preferences", label: "Preferred intake", done: !!p.preferredIntake, hint: "Choose an intake" },
+    { section: "Preferences", label: "Target countries", done: p.targetCountries.length > 0, hint: "Pick target countries" },
+  ];
+}
+
+function ChecklistCard({ checklist, done, total, percent }: { checklist: Check[]; done: number; total: number; percent: number }) {
+  const sections = [...new Set(checklist.map((c) => c.section))];
+  const complete = done === total;
+  return (
+    <div className="glass rounded-2xl p-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-base font-semibold">{complete ? "🎉 Profile complete!" : "🎯 Reach 100%"}</h2>
+          <p className="mt-1 text-sm text-muted">
+            {complete ? "Every section is filled — you’ll get the sharpest matches." : `${done} of ${total} done — finish the ${total - done} item(s) below to hit 100%.`}
+          </p>
+        </div>
+        <span className="gradient-text text-2xl font-bold">{percent}%</span>
+      </div>
+
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/[0.06]">
+        <div className="h-full rounded-full bg-gradient-to-r from-brand to-accent transition-all" style={{ width: `${percent}%` }} />
+      </div>
+
+      <div className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+        {sections.map((sec) => (
+          <div key={sec}>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{sec}</div>
+            <ul className="space-y-1.5">
+              {checklist.filter((c) => c.section === sec).map((c) => (
+                <li key={c.label} className="flex items-start gap-2 text-sm">
+                  {c.done ? <CheckDone /> : <CheckPending />}
+                  <span className={c.done ? "text-foreground" : "text-foreground"}>
+                    {c.label}
+                    {!c.done && <span className="ml-1 text-muted">— {c.hint}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CheckDone() {
+  return (
+    <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand to-brand-2 text-white">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="h-2.5 w-2.5"><path d="m5 13 4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    </span>
+  );
+}
+function CheckPending() {
+  return <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 border-black/15" />;
+}
+
+/* ------------------------------------------------------- list card with add form */
+
+interface Field { name: string; label: string; type?: string; options?: string[]; required?: boolean; }
+
+function ListCard({
+  title, empty, items, onRemove, fields, onAdd,
+}: {
+  title: string; empty: string;
+  items: { id: string; main: string; sub: string }[];
+  onRemove: (id: string) => void;
+  fields: Field[];
+  onAdd: (values: Record<string, string>) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [vals, setVals] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+
+  function start() {
+    setVals(Object.fromEntries(fields.filter((f) => f.options).map((f) => [f.name, f.options![0]])));
+    setOpen(true);
+  }
+  const canSubmit = fields.filter((f) => f.required).every((f) => (vals[f.name] ?? "").trim());
+  async function submit() {
+    if (!canSubmit) return;
+    setBusy(true);
+    try { await onAdd(vals); setVals({}); setOpen(false); }
+    catch { /* surfaced via alert below */ }
+    finally { setBusy(false); }
+  }
+
   return (
     <div className="glass rounded-2xl p-5">
-      <h2 className="mb-3 text-base font-semibold">{title}</h2>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-base font-semibold">{title}</h2>
+        <button onClick={() => (open ? setOpen(false) : start())} className="rounded-lg border border-black/10 bg-black/[0.04] px-2.5 py-1 text-xs hover:bg-black/[0.06]">
+          {open ? "Cancel" : "+ Add"}
+        </button>
+      </div>
+
+      {open && (
+        <div className="mb-4 space-y-2 rounded-xl border border-black/[0.06] bg-black/[0.02] p-3">
+          {fields.map((f) => (
+            f.options ? (
+              <select key={f.name} value={vals[f.name] ?? f.options[0]} onChange={(e) => setVals((v) => ({ ...v, [f.name]: e.target.value }))} className="w-full rounded-lg border border-black/10 bg-black/[0.04] px-3 py-2 text-sm outline-none focus:border-brand-2/60">
+                {f.options.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            ) : (
+              <input key={f.name} type={f.type ?? "text"} value={vals[f.name] ?? ""} placeholder={f.label} onChange={(e) => setVals((v) => ({ ...v, [f.name]: e.target.value }))} className="w-full rounded-lg border border-black/10 bg-black/[0.04] px-3 py-2 text-sm outline-none focus:border-brand-2/60" />
+            )
+          ))}
+          <button onClick={submit} disabled={!canSubmit || busy} className="btn-gradient w-full rounded-lg py-2 text-sm font-medium text-white disabled:opacity-50">
+            {busy ? "Adding…" : "Add"}
+          </button>
+        </div>
+      )}
+
       {items.length === 0 ? (
         <p className="text-sm text-muted">{empty}</p>
       ) : (
