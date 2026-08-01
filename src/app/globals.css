@@ -17,6 +17,7 @@
   --brand-2: #a06bf0; /* soft violet/lavender */
   --accent: #ff9e6d; /* peach */
   --success: #24a97e; /* soft green */
+  --danger: #e5544b; /* soft red */
 
   --border: rgba(60, 40, 56, 0.1);
   --card: rgba(255, 255, 255, 0.6);
@@ -31,6 +32,7 @@
   --color-brand-2: var(--brand-2);
   --color-accent: var(--accent);
   --color-success: var(--success);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
