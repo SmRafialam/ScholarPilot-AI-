@@ -12,18 +12,24 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
+    setSlow(false);
+    // The free backend may be waking from sleep — tell the user instead of hanging.
+    const t = setTimeout(() => setSlow(true), 4000);
     try {
       await login(email, password);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
+      clearTimeout(t);
       setLoading(false);
+      setSlow(false);
     }
   }
 
@@ -46,6 +52,11 @@ export default function LoginPage() {
           <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" />
           <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
           {error && <p className="text-sm text-red-400">{error}</p>}
+          {slow && (
+            <p className="rounded-xl border border-brand-2/30 bg-brand-2/10 px-3 py-2 text-xs text-muted">
+              ⏳ Waking up the server (free tier) — the first request can take up to ~40s. Hang tight…
+            </p>
+          )}
           <button
             type="submit"
             disabled={loading}
