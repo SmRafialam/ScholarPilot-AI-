@@ -86,7 +86,14 @@ export default function TrackerPage() {
     await load();
   }
 
-  if (!board) return <div className="text-muted">Loading…</div>;
+  if (!board)
+    return (
+      <div className="space-y-5">
+        <div className="skeleton h-8 w-56" />
+        <div className="skeleton h-14 w-full rounded-2xl" />
+        <div className="skeleton h-40 w-full rounded-2xl" />
+      </div>
+    );
 
   const apps = board.stages.flatMap((s) => board.columns[s] ?? []);
   const counts = Object.fromEntries(ALL_STAGES.map((s) => [s, (board.columns[s] ?? []).length]));

@@ -20,18 +20,47 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const USER_KEY = "sp_user";
+function readCachedUser(): User | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+function cacheUser(u: User | null) {
+  if (typeof window === "undefined") return;
+  if (u) localStorage.setItem(USER_KEY, JSON.stringify(u));
+  else localStorage.removeItem(USER_KEY);
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!tokens.access) {
+      cacheUser(null);
       setLoading(false);
       return;
     }
+    // Hydrate instantly from the cached user so the app shell renders without
+    // waiting on the network, then revalidate /auth/me in the background.
+    const cached = readCachedUser();
+    if (cached) {
+      setUser(cached);
+      setLoading(false);
+    }
     api<User>("/auth/me")
-      .then(setUser)
-      .catch(() => tokens.clear())
+      .then((u) => {
+        setUser(u);
+        cacheUser(u);
+      })
+      .catch(() => {
+        /* the api client handles 401 → refresh → redirect */
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -41,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { method: "POST", body: JSON.stringify({ email, password }) },
     );
     tokens.set(data.accessToken, data.refreshToken);
+    cacheUser(data.user);
     setUser(data.user);
   }
 
@@ -50,10 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { method: "POST", body: JSON.stringify({ email, password, fullName }) },
     );
     tokens.set(data.accessToken, data.refreshToken);
+    cacheUser(data.user);
     setUser(data.user);
   }
 
   function logout() {
+    cacheUser(null);
     const refreshToken = tokens.refresh;
     if (refreshToken) {
       api("/auth/logout", {

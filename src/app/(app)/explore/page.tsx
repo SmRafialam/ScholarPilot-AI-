@@ -345,8 +345,15 @@ export default function ExplorePage() {
         </Grid>
       )}
 
-      {loading && (
-        <div className="glass rounded-2xl p-8 text-center text-sm text-muted">Loading…</div>
+      {loading && shown === 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-28" />
+          ))}
+        </div>
+      )}
+      {loading && shown > 0 && (
+        <div className="glass rounded-2xl p-4 text-center text-sm text-muted">Loading…</div>
       )}
       {!loading && total === 0 && (
         <div className="glass rounded-2xl p-10 text-center text-muted">No results — try a different search or country.</div>

@@ -135,7 +135,15 @@ export default function ProfilePage() {
     await load();
   }
 
-  if (!p) return <div className="text-muted">Loading…</div>;
+  if (!p)
+    return (
+      <div className="space-y-6">
+        <div className="skeleton h-8 w-48" />
+        <div className="skeleton h-28 w-full rounded-2xl" />
+        <div className="skeleton h-64 w-full rounded-2xl" />
+        <div className="skeleton h-40 w-full rounded-2xl" />
+      </div>
+    );
 
   const checklist = buildChecklist(p);
   const done = checklist.filter((c) => c.done).length;
