@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DestinationGallery from "./_destination-gallery";
 
 /* ------------------------------------------------------------------ data */
 
@@ -210,6 +211,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ===================== DESTINATION GALLERY ===================== */}
+      <DestinationGallery />
 
       {/* ===================== FEATURES ===================== */}
       <section id="features" className="relative px-6 py-24">
