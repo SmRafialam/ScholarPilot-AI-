@@ -82,6 +82,74 @@ const PRICING = [
   },
 ];
 
+const SITE = "https://scholar-pilot-ai-flame.vercel.app";
+
+const FAQS = [
+  {
+    q: "What is ScholarPilot AI?",
+    a: "ScholarPilot AI is an AI copilot for studying abroad. It matches you with the best-fit universities, scholarships and professors, predicts your admission and funding chances, and generates your SOPs, motivation letters and cold emails.",
+  },
+  {
+    q: "Which countries and study destinations does it cover?",
+    a: "It covers 12 destinations including the USA, UK, Canada, Germany, Australia, Netherlands, Sweden, Ireland, Finland, Norway, Denmark and Italy.",
+  },
+  {
+    q: "Is ScholarPilot AI free?",
+    a: "Yes — you can start free with no card. Paid Pro and Premium plans unlock unlimited matches, more AI documents and professor matching.",
+  },
+  {
+    q: "How does the AI university matching work?",
+    a: "It scores universities, scholarships and professors against your academic profile, budget, deadlines and research interests, then explains why each one is a fit.",
+  },
+  {
+    q: "Can ScholarPilot AI write my SOP and emails to professors?",
+    a: "Yes. It generates tailored statements of purpose, motivation letters and cold emails grounded on your real profile — which you can freely edit before sending.",
+  },
+  {
+    q: "How accurate are the admission and funding predictions?",
+    a: "Predictions are transparent estimates based on your profile strength versus each program's requirements, shown with the reasoning — not a black box.",
+  },
+];
+
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#organization`,
+      name: "ScholarPilot AI",
+      url: SITE,
+      logo: `${SITE}/opengraph-image`,
+      description: "AI copilot for studying abroad — university, scholarship and professor matching, admission and funding predictions, and AI document generation.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      name: "ScholarPilot AI",
+      url: SITE,
+      publisher: { "@id": `${SITE}/#organization` },
+      inLanguage: "en",
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "ScholarPilot AI",
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      url: SITE,
+      description: "Match universities, scholarships and professors, predict admission and funding chances, and generate SOPs and emails with AI.",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: FAQS.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+};
+
 /* --------------------------------------------------------------- section */
 
 function Icon({ path, className = "" }: { path: string; className?: string }) {
@@ -105,6 +173,12 @@ function Icon({ path, className = "" }: { path: string; className?: string }) {
 export default function Home() {
   return (
     <div className="relative w-full">
+      {/* SEO — structured data for rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
+
       {/* ===================== NAVBAR ===================== */}
       <header className="fixed top-0 inset-x-0 z-50">
         <nav className="glass mx-auto mt-4 flex max-w-6xl items-center justify-between rounded-2xl px-5 py-3">
@@ -120,6 +194,7 @@ export default function Home() {
             <a href="#features" className="transition-colors hover:text-foreground">Features</a>
             <a href="#how" className="transition-colors hover:text-foreground">How it works</a>
             <a href="#pricing" className="transition-colors hover:text-foreground">Pricing</a>
+            <a href="#faq" className="transition-colors hover:text-foreground">FAQ</a>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="hidden text-sm text-muted transition-colors hover:text-foreground sm:block">
@@ -330,6 +405,28 @@ export default function Home() {
                   {p.cta}
                 </Link>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== FAQ ===================== */}
+      <section id="faq" className="relative px-6 py-24">
+        <div className="relative z-10 mx-auto max-w-3xl">
+          <div className="mb-14 text-center">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Frequently asked <span className="gradient-text">questions</span>
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map((f) => (
+              <details key={f.q} className="glass rounded-2xl p-5 [&[open]_svg]:rotate-45">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
+                  {f.q}
+                  <Icon path="M12 5v14M5 12h14" className="h-5 w-5 shrink-0 text-brand-2 transition-transform" />
+                </summary>
+                <p className="mt-3 text-sm leading-7 text-muted">{f.a}</p>
+              </details>
             ))}
           </div>
         </div>
