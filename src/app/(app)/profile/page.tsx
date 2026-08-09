@@ -9,6 +9,24 @@ const COUNTRIES = [
 ];
 const INTAKES = ["FALL", "SPRING", "SUMMER", "WINTER"];
 const DEGREES = ["BACHELOR", "MASTER", "PHD", "DIPLOMA", "CERTIFICATE"];
+const STATUSES = [
+  { value: "STUDENT", label: "Current student" },
+  { value: "GRADUATE", label: "Graduate (degree completed)" },
+  { value: "WORKING", label: "Working professional" },
+  { value: "OTHER", label: "Other" },
+];
+const DOC_TYPES = [
+  "Transcript / Marksheet",
+  "Degree Certificate",
+  "IELTS / TOEFL Scorecard",
+  "Experience Letter",
+  "Recommendation Letter (LOR)",
+  "CV / Resume",
+  "Passport",
+  "Other",
+];
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 interface Skill { id: string; name: string; }
 interface TestScore { id: string; type: string; score: number; }
@@ -16,10 +34,12 @@ interface Education { id: string; institution: string; degree: string; major: st
 interface Experience { id: string; title: string; organization: string; }
 interface Project { id: string; name: string; }
 interface Publication { id: string; title: string; venue: string | null; year: number | null; }
+interface DocItem { id: string; type: string; name: string; url: string; createdAt: string; }
 interface Country { id: string; name: string; }
 interface Profile {
   fullName: string | null;
   countryId: string | null;
+  currentStatus: string | null;
   currentUniversity: string | null;
   department: string | null;
   cgpa: number | null;
@@ -34,6 +54,7 @@ interface Profile {
   experiences: Experience[];
   projects: Project[];
   publications: Publication[];
+  documents: DocItem[];
 }
 
 export default function ProfilePage() {
@@ -46,6 +67,10 @@ export default function ProfilePage() {
   const [cvBusy, setCvBusy] = useState(false);
   const [cvMsg, setCvMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [docType, setDocType] = useState(DOC_TYPES[0]);
+  const [docBusy, setDocBusy] = useState(false);
+  const [docMsg, setDocMsg] = useState("");
+  const docFileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     const data = await api<Profile>("/profile/me");
@@ -78,6 +103,7 @@ export default function ProfilePage() {
         method: "PATCH",
         body: JSON.stringify({
           countryId: p.countryId || undefined,
+          currentStatus: p.currentStatus || undefined,
           currentUniversity: p.currentUniversity || undefined,
           department: p.department || undefined,
           cgpa: p.cgpa ?? undefined,
@@ -113,6 +139,38 @@ export default function ProfilePage() {
     } finally {
       setCvBusy(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function uploadDocument(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!CLOUD_NAME || !UPLOAD_PRESET) {
+      setDocMsg("Document storage isn't configured yet.");
+      if (docFileRef.current) docFileRef.current.value = "";
+      return;
+    }
+    setDocBusy(true); setDocMsg("");
+    try {
+      // 1) upload the raw file to Cloudinary (unsigned preset)
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", UPLOAD_PRESET);
+      const up = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: "POST", body: fd });
+      const data = await up.json();
+      if (!data.secure_url) throw new Error(data?.error?.message ?? "Upload failed");
+      // 2) save the document metadata on our backend
+      await api("/profile/documents", {
+        method: "POST",
+        body: JSON.stringify({ type: docType, name: file.name, url: data.secure_url, mimeType: file.type || undefined, sizeBytes: file.size }),
+      });
+      setDocMsg("Uploaded ✓");
+      await load();
+    } catch (err) {
+      setDocMsg(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setDocBusy(false);
+      if (docFileRef.current) docFileRef.current.value = "";
     }
   }
 
@@ -175,6 +233,23 @@ export default function ProfilePage() {
 
       {/* Core */}
       <div className="glass space-y-4 rounded-2xl p-6">
+        <div>
+          <span className="mb-1.5 block text-sm text-muted">Current status</span>
+          <div className="flex flex-wrap gap-2">
+            {STATUSES.map((st) => (
+              <button
+                key={st.value}
+                type="button"
+                onClick={() => set("currentStatus", st.value)}
+                className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${p.currentStatus === st.value ? "border-brand-2/50 bg-brand/20 text-foreground" : "border-black/10 bg-black/[0.04] text-muted hover:text-foreground"}`}
+              >
+                {st.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted">{statusHint(p.currentStatus)}</p>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <span className="mb-1.5 block text-sm text-muted">Home country</span>
@@ -183,7 +258,7 @@ export default function ProfilePage() {
               {countries.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
-          <Text label="Current university" value={p.currentUniversity ?? ""} onChange={(v) => set("currentUniversity", v)} />
+          <Text label="Institution (most recent / highest)" value={p.currentUniversity ?? ""} onChange={(v) => set("currentUniversity", v)} />
           <Text label="Department / Major" value={p.department ?? ""} onChange={(v) => set("department", v)} />
           <Num label="CGPA (out of 4)" value={p.cgpa} onChange={(v) => set("cgpa", v)} step="0.01" />
           <Num label="Budget (USD / year)" value={p.budgetUsd} onChange={(v) => set("budgetUsd", v)} />
@@ -266,8 +341,61 @@ export default function ProfilePage() {
           onAdd={(v) => addItem("publications", { title: v.title, venue: v.venue || undefined, year: v.year ? Number(v.year) : undefined })}
         />
       </div>
+
+      {/* Documents & Certificates */}
+      <div className="glass rounded-2xl p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold">📎 Documents &amp; Certificates</h2>
+            <p className="mt-1 text-sm text-muted">Transcripts, degree certificates, IELTS scorecards, experience letters, LORs — keep them all in one place.</p>
+          </div>
+          {CLOUD_NAME && UPLOAD_PRESET && (
+            <div className="flex items-center gap-2">
+              <select value={docType} onChange={(e) => setDocType(e.target.value)} className="rounded-xl border border-black/10 bg-black/[0.04] px-3 py-2.5 text-sm outline-none focus:border-brand-2/60">
+                {DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <label className="btn-gradient shrink-0 cursor-pointer rounded-xl px-4 py-2.5 text-sm font-medium text-white">
+                {docBusy ? "Uploading…" : "Upload"}
+                <input ref={docFileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onChange={uploadDocument} disabled={docBusy} className="hidden" />
+              </label>
+            </div>
+          )}
+        </div>
+        {docMsg && <p className="mt-3 text-sm text-muted">{docMsg}</p>}
+        {(!CLOUD_NAME || !UPLOAD_PRESET) && (
+          <p className="mt-3 rounded-xl border border-dashed border-black/10 px-4 py-4 text-sm text-muted">
+            📦 Document uploads aren’t enabled yet — a free storage account needs to be connected.
+          </p>
+        )}
+        <div className="mt-4 space-y-2">
+          {p.documents.length === 0 && CLOUD_NAME && UPLOAD_PRESET && (
+            <p className="text-sm text-muted">No documents uploaded yet.</p>
+          )}
+          {p.documents.map((d) => (
+            <div key={d.id} className="flex items-center justify-between gap-3 rounded-xl border border-black/[0.06] bg-black/[0.02] px-4 py-3">
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium">{d.name}</div>
+                <div className="text-xs text-muted">{d.type}</div>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <a href={d.url} target="_blank" rel="noreferrer" className="text-sm text-brand hover:underline">View</a>
+                <button onClick={() => removeItem("documents", d.id)} className="text-muted hover:text-red-400">×</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
+}
+
+function statusHint(status: string | null): string {
+  switch (status) {
+    case "GRADUATE": return "Add your completed degree (with CGPA) under Education below.";
+    case "WORKING": return "Add your job under Experience, and your degree under Education.";
+    case "STUDENT": return "Add your ongoing degree under Education below.";
+    default: return "Pick what best describes you — it helps tailor your matches and predictions.";
+  }
 }
 
 /* ------------------------------------------------------- completion checklist */
@@ -278,7 +406,7 @@ function buildChecklist(p: Profile): Check[] {
   return [
     { section: "Basics", label: "Full name", done: !!p.fullName, hint: "Set when you signed up" },
     { section: "Basics", label: "Home country", done: !!p.countryId, hint: "Pick your home country below" },
-    { section: "Academics", label: "Current university", done: !!p.currentUniversity, hint: "Fill “Current university”" },
+    { section: "Academics", label: "Institution (most recent)", done: !!p.currentUniversity, hint: "Fill your most recent institution" },
     { section: "Academics", label: "Department / Major", done: !!p.department, hint: "Fill “Department / Major”" },
     { section: "Academics", label: "CGPA", done: p.cgpa != null, hint: "Fill “CGPA”" },
     { section: "Academics", label: "Education entry", done: p.educations.length > 0, hint: "Add an education (or import CV)" },
