@@ -74,8 +74,9 @@ export default function ProfilePage() {
 
   async function load() {
     const data = await api<Profile>("/profile/me");
-    setP(data);
-    const cur = data.testScores.find((t) => t.type === "IELTS");
+    // Tolerate an older backend that doesn't yet return the newer fields.
+    setP({ ...data, documents: data.documents ?? [] });
+    const cur = (data.testScores ?? []).find((t) => t.type === "IELTS");
     setIelts(cur ? String(cur.score) : "");
   }
   useEffect(() => {
