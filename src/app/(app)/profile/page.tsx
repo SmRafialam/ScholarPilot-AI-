@@ -67,6 +67,7 @@ export default function ProfilePage() {
   const [cvBusy, setCvBusy] = useState(false);
   const [cvMsg, setCvMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [supportsStatus, setSupportsStatus] = useState(false);
   const [docType, setDocType] = useState(DOC_TYPES[0]);
   const [docBusy, setDocBusy] = useState(false);
   const [docMsg, setDocMsg] = useState("");
@@ -75,6 +76,7 @@ export default function ProfilePage() {
   async function load() {
     const data = await api<Profile>("/profile/me");
     // Tolerate an older backend that doesn't yet return the newer fields.
+    setSupportsStatus("currentStatus" in data);
     setP({ ...data, documents: data.documents ?? [] });
     const cur = (data.testScores ?? []).find((t) => t.type === "IELTS");
     setIelts(cur ? String(cur.score) : "");
@@ -104,7 +106,7 @@ export default function ProfilePage() {
         method: "PATCH",
         body: JSON.stringify({
           countryId: p.countryId || undefined,
-          currentStatus: p.currentStatus || undefined,
+          ...(supportsStatus ? { currentStatus: p.currentStatus || undefined } : {}),
           currentUniversity: p.currentUniversity || undefined,
           department: p.department || undefined,
           cgpa: p.cgpa ?? undefined,
